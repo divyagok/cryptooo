@@ -1,0 +1,44 @@
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import dsa
+from cryptography.exceptions import InvalidSignature
+
+# Generate DSA key pair
+def generate_dsa_key_pair():
+    private_key = dsa.generate_private_key(key_size=1024, backend=default_backend())
+    public_key = private_key.public_key()
+    return private_key, public_key
+
+# Sign a message using DSA private key
+def sign_message(private_key, message):
+    signature = private_key.sign(message, hashes.SHA256())
+    return signature
+
+# Verify the signature of a message using DSA public key
+def verify_signature(public_key, message, signature):
+    try:
+        public_key.verify(signature, message, hashes.SHA256())
+        return True
+    except InvalidSignature:
+        return False
+
+def main():
+    # Generate DSA key pair
+    private_key, public_key = generate_dsa_key_pair()
+
+    # Message to be signed
+    message = b"Hello, world!"
+
+    # Sign the message
+    signature = sign_message(private_key, message)
+
+    # Verify the signature
+    is_valid = verify_signature(public_key, message, signature)
+
+    if is_valid:
+        print("Signature is valid.")
+    else:
+        print("Signature is not valid.")
+
+if __name__ == "__main__":
+    main()
