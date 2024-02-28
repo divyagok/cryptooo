@@ -1,0 +1,46 @@
+import numpy as np
+
+# Function to encrypt plaintext using the Hill cipher
+def hill_encrypt(plaintext, key):
+    plaintext = plaintext.replace(' ', '')  # Remove spaces
+    n = len(key)
+    padded_plaintext = plaintext + 'X' * (n - len(plaintext) % n)  # Pad plaintext if needed
+    encrypted_text = ''
+    for i in range(0, len(padded_plaintext), n):
+        block = padded_plaintext[i:i+n]
+        block_indices = [ord(char) - ord('A') for char in block]
+        encrypted_block = np.dot(key, block_indices) % 26
+        encrypted_text += ''.join([chr(index + ord('A')) for index in encrypted_block])
+    return encrypted_text
+
+# Function to decrypt ciphertext using the Hill cipher
+def hill_decrypt(ciphertext, key):
+    n = len(key)
+    inverse_key = np.linalg.inv(key)
+    decrypted_text = ''
+    for i in range(0, len(ciphertext), n):
+        block = ciphertext[i:i+n]
+        block_indices = [ord(char) - ord('A') for char in block]
+        decrypted_block = np.dot(inverse_key, block_indices) % 26
+        decrypted_text += ''.join([chr(index + ord('A')) for index in decrypted_block])
+    return decrypted_text
+
+# Known plaintext attack demonstration
+plaintext = 'HELLO'
+ciphertext = 'ILBCK'
+known_plain = 'ABCDE'
+known_cipher = 'IFKPT'
+
+# Calculate key using the known plaintext-ciphertext pair
+known_plain_indices = [ord(char) - ord('A') for char in known_plain]
+known_cipher_indices = [ord(char) - ord('A') for char in known_cipher]
+key = np.dot(np.linalg.inv(np.array(known_plain_indices).reshape(5, 1)), np.array(known_cipher_indices).reshape(5, 1)).T % 26
+
+# Test encryption and decryption
+key = np.round(key).astype(int)  # Round key to integers
+encrypted_text = hill_encrypt(plaintext, key)
+decrypted_text = hill_decrypt(ciphertext, key)
+
+print("Original plaintext:", plaintext)
+print("Encrypted ciphertext:", ciphertext)
+print("Decrypted plaintext:", decrypted_text)
