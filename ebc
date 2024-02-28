@@ -1,0 +1,43 @@
+# Function to encrypt plaintext using ECB mode
+def ecb_encrypt(plaintext, key):
+    ciphertext = ''
+    for block in plaintext_blocks(plaintext):
+        encrypted_block = encrypt_block(block, key)
+        ciphertext += encrypted_block
+    return ciphertext
+
+# Function to decrypt ciphertext using ECB mode
+def ecb_decrypt(ciphertext, key):
+    plaintext = ''
+    for block in ciphertext_blocks(ciphertext):
+        decrypted_block = decrypt_block(block, key)
+        plaintext += decrypted_block
+    return plaintext
+
+# Function to split plaintext into blocks of fixed size
+def plaintext_blocks(plaintext, block_size=8):
+    return [plaintext[i:i+block_size] for i in range(0, len(plaintext), block_size)]
+
+# Function to split ciphertext into blocks of fixed size
+def ciphertext_blocks(ciphertext, block_size=8):
+    return [ciphertext[i:i+block_size] for i in range(0, len(ciphertext), block_size)]
+
+# Function to perform encryption on a single block
+def encrypt_block(block, key):
+    # Perform encryption logic here (e.g., DES, AES, etc.)
+    return block[::-1]  # Dummy encryption, reverse the block
+
+# Function to perform decryption on a single block
+def decrypt_block(block, key):
+    # Perform decryption logic here (e.g., DES, AES, etc.)
+    return block[::-1]  # Dummy decryption, reverse the block
+
+# Test ECB mode encryption and decryption
+plaintext = 'HelloWorld12345678'
+key = 'secretkey'
+ciphertext = ecb_encrypt(plaintext, key)
+decrypted_plaintext = ecb_decrypt(ciphertext, key)
+
+print("Original plaintext:", plaintext)
+print("Encrypted ciphertext:", ciphertext)
+print("Decrypted plaintext:", decrypted_plaintext)
