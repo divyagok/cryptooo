@@ -1,0 +1,74 @@
+import random
+import math
+
+# Function to generate random prime number of specified size
+def generate_prime(size):
+    while True:
+        num = random.randint(2**(size-1), 2**size - 1)
+        if is_prime(num):
+            return num
+
+# Function to check if a number is prime
+def is_prime(n):
+    if n <= 1:
+        return False
+    if n <= 3:
+        return True
+    if n % 2 == 0 or n % 3 == 0:
+        return False
+    i = 5
+    while i * i <= n:
+        if n % i == 0 or n % (i + 2) == 0:
+            return False
+        i += 6
+    return True
+
+# Function to compute greatest common divisor (GCD)
+def gcd(a, b):
+    while b != 0:
+        a, b = b, a % b
+    return a
+
+# Function to compute modular multiplicative inverse
+def mod_inverse(a, m):
+    m0, x0, x1 = m, 0, 1
+    while a > 1:
+        q = a // m
+        m, a = a % m, m
+        x0, x1 = x1 - q * x0, x0
+    return x1 + m0 if x1 < 0 else x1
+
+# Function to generate RSA key pair
+def generate_rsa_key_pair(key_size):
+    # Step 1: Choose two large random prime numbers p and q
+    p = generate_prime(key_size // 2)
+    q = generate_prime(key_size // 2)
+
+    # Step 2: Compute n = p * q
+    n = p * q
+
+    # Step 3: Compute Euler's totient function phi(n)
+    phi_n = (p - 1) * (q - 1)
+
+    # Step 4: Choose public exponent e such that 1 < e < phi(n) and gcd(e, phi(n)) = 1
+    e = random.randint(2, phi_n - 1)
+    while gcd(e, phi_n) != 1:
+        e = random.randint(2, phi_n - 1)
+
+    # Step 5: Compute private exponent d such that d ≡ e^(-1) (mod phi(n))
+    d = mod_inverse(e, phi_n)
+
+    return ((n, e), (n, d))
+
+# Generate initial RSA key pair for Bob
+bob_public_key, bob_private_key = generate_rsa_key_pair(1024)
+
+# Bob leaks his private key, so he generates a new public and private key pair
+new_bob_public_key, new_bob_private_key = generate_rsa_key_pair(1024)
+
+# Display the original and new RSA key pairs for Bob
+print("Original Bob's Public Key (n, e):", bob_public_key)
+print("Original Bob's Private Key (n, d):", bob_private_key)
+print()
+print("New Bob's Public Key (n, e):", new_bob_public_key)
+print("New Bob's Private Key (n, d):", new_bob_private_key)
