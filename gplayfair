@@ -1,0 +1,74 @@
+import re
+
+def construct_playfair_matrix(key):
+    # Convert key to uppercase and remove non-alphabetic characters
+    key = re.sub(r'[^A-Z]', '', key.upper())
+    key = key.replace('J', 'I')  # Replace 'J' with 'I'
+    
+    # Initialize Playfair matrix with unique characters from the key
+    matrix = []
+    for char in key:
+        if char not in matrix:
+            matrix.append(char)
+    
+    # Fill remaining matrix slots with remaining alphabet characters
+    for char in 'ABCDEFGHIKLMNOPQRSTUVWXYZ':
+        if char not in matrix:
+            matrix.append(char)
+    
+    # Reshape matrix to a 5x5 grid
+    matrix = [matrix[i:i+5] for i in range(0, 25, 5)]
+    return matrix
+
+def find_char_positions(matrix, char):
+    positions = []
+    for i in range(5):
+        for j in range(5):
+            if matrix[i][j] == char:
+                positions.append((i, j))
+    return positions
+
+def encrypt_playfair(matrix, plaintext):
+    # Convert plaintext to uppercase and remove non-alphabetic characters
+    plaintext = re.sub(r'[^A-Z]', '', plaintext.upper())
+    plaintext = plaintext.replace('J', 'I')  # Replace 'J' with 'I'
+    
+    # Add filler character 'X' between consecutive identical letters and pad if necessary
+    plaintext = re.sub(r'((\w)\2)', r'\1X', plaintext)
+    if len(plaintext) % 2 != 0:
+        plaintext += 'X'
+    
+    # Encrypt plaintext pairs using Playfair cipher rules
+    ciphertext = ''
+    for i in range(0, len(plaintext), 2):
+        char1, char2 = plaintext[i], plaintext[i+1]
+        row1, col1 = find_char_positions(matrix, char1)[0]
+        row2, col2 = find_char_positions(matrix, char2)[0]
+        
+        if row1 == row2:
+            ciphertext += matrix[row1][(col1 + 1) % 5] + matrix[row2][(col2 + 1) % 5]
+        elif col1 == col2:
+            ciphertext += matrix[(row1 + 1) % 5][col1] + matrix[(row2 + 1) % 5][col2]
+        else:
+            ciphertext += matrix[row1][col2] + matrix[row2][col1]
+    
+    return ciphertext
+
+def print_matrix(matrix):
+    for row in matrix:
+        print(' '.join(row))
+
+# Define the Playfair key and plaintext
+key = 'MFHIJKUNOPQZVWXYELARGBDSTC'
+plaintext = 'Must see you over Cadogan West. Coming at once'
+
+# Construct the Playfair matrix
+matrix = construct_playfair_matrix(key)
+print("Playfair Matrix:")
+print_matrix(matrix)
+print()
+
+# Encrypt the plaintext
+ciphertext = encrypt_playfair(matrix, plaintext)
+print("Encrypted Ciphertext:")
+print(ciphertext)
