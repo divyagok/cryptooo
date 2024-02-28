@@ -1,0 +1,39 @@
+import hashlib
+import time
+
+# Function to check if all lanes have at least one nonzero bit
+def all_nonzero(matrix):
+    for row in matrix:
+        for element in row:
+            if element == 0:
+                return False
+    return True
+
+# SHA-3 hashing function with 1024-bit block size
+def sha3_1024():
+    # Initialize internal state matrix
+    state_matrix = [[0] * 64 for _ in range(5)]
+
+    # Loop until all lanes have at least one nonzero bit
+    start_time = time.time()
+    while not all_nonzero(state_matrix):
+        # Update internal state (mock implementation)
+        for i in range(5):
+            for j in range(64):
+                state_matrix[i][j] += 1
+
+    # Calculate time taken
+    end_time = time.time()
+    duration = end_time - start_time
+
+    return duration
+
+def main():
+    # Perform SHA-3 hashing and measure time
+    duration = sha3_1024()
+
+    # Print the time taken
+    print(f"Time taken to fill all lanes with at least one nonzero bit: {duration:.4f} seconds")
+
+if __name__ == "__main__":
+    main()
