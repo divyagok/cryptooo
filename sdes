@@ -1,0 +1,65 @@
+# S-DES key
+key = [0, 1, 1, 1, 1, 1, 1, 0, 1, 1]
+
+# Initial vector
+iv = [1, 0, 1, 0, 1, 0, 1, 0]
+
+# Perform permutation
+def permute(input_block, perm):
+    return [input_block[i] for i in perm]
+
+# XOR operation
+def xor(a, b):
+    return [x ^ y for x, y in zip(a, b)]
+
+# Substitute using S-Box
+def substitute(input_block):
+    row = input_block[0] * 2 + input_block[3]
+    col = input_block[1] * 2 + input_block[2]
+    s_box = [
+        [[1, 0, 3, 2], [3, 2, 1, 0], [0, 2, 1, 3], [3, 1, 3, 2]],
+        [[0, 1, 2, 3], [2, 0, 1, 3], [3, 0, 1, 0], [2, 1, 0, 3]]
+    ]
+    return [int(x) for x in bin(s_box[row][col][0])[2:].zfill(2)]
+
+# S-DES round function
+def round_function(input_block, key):
+    expanded = permute(input_block, [3, 0, 1, 2, 1, 2, 3, 0])
+    permuted = xor(expanded, key)
+    substituted = substitute(permuted)
+    return permute(substituted, [1, 3, 2, 0])
+
+# Encrypt one block using S-DES
+def sdes_encrypt_block(plaintext_block, key, iv):
+    input_block = xor(plaintext_block, iv)
+    output_block = round_function(input_block, key)
+    return xor(output_block, iv)
+
+# Decrypt one block using S-DES
+def sdes_decrypt_block(ciphertext_block, key, iv):
+    input_block = xor(ciphertext_block, iv)
+    output_block = round_function(input_block, key)
+    return xor(output_block, iv)
+
+# Print binary array
+def print_binary(arr):
+    print("".join(map(str, arr)))
+
+def main():
+    plaintext = [0, 0, 0, 0, 0, 1, 0, 0,
+                 0, 0, 1, 0, 0, 1, 1, 0,
+                 0, 0, 1, 1, 0, 0, 1, 1,
+                 0, 1, 0, 0, 1, 1, 0, 1]
+
+    # Encrypt
+    ciphertext = sdes_encrypt_block(plaintext, key, iv)
+    print("Encrypted ciphertext:", end=" ")
+    print_binary(ciphertext)
+
+    # Decrypt
+    decrypted_plaintext = sdes_decrypt_block(ciphertext, key, iv)
+    print("Decrypted plaintext:", end=" ")
+    print_binary(decrypted_plaintext)
+
+if _name_ == "_main_":
+    main()
