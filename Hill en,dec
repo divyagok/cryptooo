@@ -1,0 +1,31 @@
+import numpy as np
+
+def text_to_matrix(text, n):
+    text = text.upper().replace(" ", "")
+    matrix = []
+    for char in text:
+        matrix.append(ord(char) - 65)  # Convert ASCII to 0-indexed alphabet position
+    while len(matrix) % n != 0:
+        matrix.append(23)  # Append 'X' to make the length a multiple of n
+    return np.array(matrix).reshape(-1, n)
+
+def matrix_to_text(matrix):
+    text = ""
+    for row in matrix:
+        for val in row:
+            text += chr(val + 65)  # Convert back to ASCII
+    return text
+
+def encrypt(plain_text, key):
+    n = len(key)
+    plain_matrix = text_to_matrix(plain_text, n)
+    key_matrix = np.array(key)
+    encrypted_matrix = np.dot(plain_matrix, key_matrix) % 26  # Mod 26 for alphabet size
+    return matrix_to_text(encrypted_matrix)
+
+def decrypt(encrypted_text, key):
+    n = len(key)
+    encrypted_matrix = text_to_matrix(encrypted_text, n)
+    key_matrix = np.linalg.inv(np.array(key))  # Inverse of the key matrix
+    decrypted_matrix = np.dot(encrypted_matrix, key_matrix).astype(int) % 26
+    return matrix_to_text(decrypted_matrix)
