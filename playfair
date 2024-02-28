@@ -1,0 +1,58 @@
+def prepare_text(text):
+    text = text.upper().replace('J', 'I')  # Convert text to uppercase and replace 'J' with 'I'
+    text = ''.join([char for char in text if char.isalpha()])  # Remove non-alphabetic characters
+    # Insert 'X' between repeated letters and make the length even
+    prepared_text = ''
+    i = 0
+    while i < len(text):
+        if i == len(text) - 1 or text[i] != text[i + 1]:
+            prepared_text += text[i]
+            i += 1
+        else:
+            prepared_text += text[i] + 'X'
+            i += 1
+    if len(prepared_text) % 2 != 0:
+        prepared_text += 'X'
+    return prepared_text
+
+def generate_key_square(key):
+    key = key.upper().replace('J', 'I')  # Convert key to uppercase and replace 'J' with 'I'
+    key = ''.join(sorted(set(key), key=key.index))  # Remove duplicates and maintain order
+    alphabet = 'ABCDEFGHIKLMNOPQRSTUVWXYZ'  # Exclude 'J'
+    key_square = key
+    for char in alphabet:
+        if char not in key_square:
+            key_square += char
+    return key_square
+
+def find_position(matrix, char):
+    for i in range(5):
+        for j in range(5):
+            if matrix[i][j] == char:
+                return i, j
+
+def encrypt_pair(matrix, pair):
+    char1, char2 = pair
+    row1, col1 = find_position(matrix, char1)
+    row2, col2 = find_position(matrix, char2)
+    if row1 == row2:
+        return matrix[row1][(col1 + 1) % 5] + matrix[row2][(col2 + 1) % 5]
+    elif col1 == col2:
+        return matrix[(row1 + 1) % 5][col1] + matrix[(row2 + 1) % 5][col2]
+    else:
+        return matrix[row1][col2] + matrix[row2][col1]
+
+def playfair_cipher_encrypt(plain_text, key):
+    prepared_text = prepare_text(plain_text)
+    key_square = generate_key_square(key)
+    matrix = [key_square[i:i+5] for i in range(0, 25, 5)]
+    encrypted_text = ''
+    for i in range(0, len(prepared_text), 2):
+        encrypted_text += encrypt_pair(matrix, prepared_text[i:i+2])
+    return encrypted_text
+
+# Example usage:
+plain_text = input("Enter text to encrypt: ")
+key = input("Enter key: ")
+encrypted_text = playfair_cipher_encrypt(plain_text, key)
+print("Encrypted text:", encrypted_text)
