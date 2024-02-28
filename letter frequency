@@ -1,0 +1,71 @@
+import string
+from collections import Counter
+
+# English letter frequency distribution
+ENGLISH_LETTER_FREQUENCY = {
+    'e': 12.02, 't': 9.10, 'a': 8.12, 'o': 7.68, 'i': 7.31, 'n': 6.95, 's': 6.28, 'r': 6.02, 'h': 5.92, 'd': 4.32,
+    'l': 3.98, 'u': 2.88, 'c': 2.71, 'm': 2.61, 'f': 2.30, 'y': 2.11, 'w': 2.09, 'g': 2.03, 'p': 1.82, 'b': 1.49,
+    'v': 1.11, 'k': 0.69, 'x': 0.17, 'q': 0.11, 'j': 0.10, 'z': 0.07
+}
+
+# Function to calculate the frequency of letters in the text
+def calculate_frequency(text):
+    text = text.lower()
+    text = ''.join(c for c in text if c.isalpha())
+    total = len(text)
+    frequencies = Counter(text)
+    for letter in frequencies:
+        frequencies[letter] = (frequencies[letter] / total) * 100
+    return frequencies
+
+# Function to generate possible plaintexts based on frequency mapping
+def generate_plaintexts(ciphertext, mapping):
+    plaintexts = []
+    for shift in range(26):
+        plaintext = ''
+        for char in ciphertext:
+            if char.isalpha():
+                if char.islower():
+                    plaintext += chr((ord(char) - ord('a') - mapping[char] + shift) % 26 + ord('a'))
+                elif char.isupper():
+                    plaintext += chr((ord(char) - ord('A') - mapping[char.lower()] + shift) % 26 + ord('A'))
+            else:
+                plaintext += char
+        plaintexts.append(plaintext)
+    return plaintexts
+
+# Function to score plaintexts based on English letter frequency
+def score_plaintexts(plaintexts):
+    scores = []
+    for plaintext in plaintexts:
+        score = sum(ENGLISH_LETTER_FREQUENCY.get(c, 0) for c in plaintext.lower())
+        scores.append((plaintext, score))
+    return sorted(scores, key=lambda x: x[1], reverse=True)
+
+# Main function
+def perform_letter_frequency_attack(ciphertext):
+    # Calculate frequency of letters in ciphertext
+    ciphertext_frequency = calculate_frequency(ciphertext)
+    
+    # Sort ciphertext letters by frequency
+    sorted_frequency = sorted(ciphertext_frequency.items(), key=lambda x: x[1], reverse=True)
+    
+    # Create mapping between ciphertext and potential plaintext letters based on frequency
+    mapping = {char: (ord(char) - ord('a')) % 26 for char, _ in sorted_frequency}
+    
+    # Generate possible plaintexts
+    plaintexts = generate_plaintexts(ciphertext, mapping)
+    
+    # Score plaintexts based on English letter frequency
+    scored_plaintexts = score_plaintexts(plaintexts)
+    
+    return scored_plaintexts
+
+# Example usage
+ciphertext = "Khoor, zruog!"
+plaintext_candidates = perform_letter_frequency_attack(ciphertext)
+
+# Display the top 10 possible plaintexts
+print("Top 10 possible plaintexts:")
+for plaintext, score in plaintext_candidates[:10]:
+    print(plaintext)
